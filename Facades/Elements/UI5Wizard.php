@@ -47,12 +47,13 @@ class UI5Wizard extends UI5Container
         $leftButtons = '';
         $rightButtons = '';
         $wizardTbEl = $this->getFacade()->getElement($this->getWidget()->getToolbarMain());
-        $leftButtons .= $wizardTbEl->buildJsConstructorsForLeftButtons();
-        $rightButtons .= $wizardTbEl->buildJsConstructorsForRightButtons();
         
-
-                 
-        $toolbar = <<<JS
+        // check if there are buttons for use in a toolbar - if not don't build a toolbar 
+        if ($wizardTbEl->getWidget()->hasButtons()){
+            $leftButtons .= $wizardTbEl->buildJsConstructorsForLeftButtons();
+            $rightButtons .= $wizardTbEl->buildJsConstructorsForRightButtons();
+            
+            $toolbar = <<<JS
 			new sap.m.OverflowToolbar({
 				content: [
                     {$leftButtons}
@@ -61,8 +62,10 @@ class UI5Wizard extends UI5Container
 				]
 			})
 JS;
-        $toolbar = $wizardTbEl->buildJsConstructor();
-        
+        } else {
+            $toolbar = '';
+        }
+                    
         $title = $this->getCaption() ? "title: '{$this->getCaption()}'," : 'showHeader: false,';
         
         return <<<JS

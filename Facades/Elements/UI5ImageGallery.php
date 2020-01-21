@@ -2,6 +2,7 @@
 namespace exface\UI5Facade\Facades\Elements;
 
 
+use exface\Core\DataTypes\UrlDataType;
 use exface\Core\Facades\AbstractAjaxFacade\Elements\JquerySlickGalleryTrait;
 use exface\Core\Facades\AbstractAjaxFacade\Elements\JqueryToolbarsTrait;
 use exface\Core\Widgets\Imagegallery;
@@ -20,7 +21,6 @@ class UI5ImageGallery extends UI5AbstractElement
 {    
     use JquerySlickGalleryTrait;
     use JqueryToolbarsTrait;
-    use UI5DataElementTrait;
     
     public function registerExternalModules(UI5ControllerInterface $controller) : UI5AbstractElement
     {
@@ -196,7 +196,7 @@ JS;
                 } catch (e) {
                     console.warn('Could not check filter validity - ', e);
                 }
-                {$paramJs}['data'] = {$configurator_element->buildJsDataGetter()};
+                {$paramJs}['data'] = {$configurator_element->buildJsDataGetter(null, true)};
                 
 JS;
     }

@@ -86,3 +86,11 @@ table.jexcel {width: 100%}
 .dashboard_gridcontainer_layout {grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)) !important; grid-auto-rows: auto !important;}
 .sapFCardContent > .sapMPanel > .sapMPanelContent {border-bottom: 0 !important}
 .dashboard_gridcontainer_gap_margin_bottom {margin-bottom: 10px !important}
+
+/* slick carousel */
+.slick-carousel.horizontal .slick-list {padding: 10px; box-sizing: border-box;}
+.slick-carousel.horizontal .slick-list, 
+.slick-carousel.horizontal .slick-track, 
+.slick-carousel.horizontal .slick-slide, 
+.slick-carousel.horizontal .slick-slide img {height: 100%}
+.slick-carousel.horizontal .slick-slide {margin-left: 10px}

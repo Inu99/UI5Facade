@@ -8,6 +8,7 @@ use exface\Core\Facades\AbstractAjaxFacade\Elements\JqueryToolbarsTrait;
 use exface\Core\Widgets\Imagegallery;
 use exface\UI5Facade\Facades\Elements\Traits\UI5DataElementTrait;
 use exface\UI5Facade\Facades\Interfaces\UI5ControllerInterface;
+use exface\Core\Interfaces\Widgets\iShowData;
 
 /**
  * Creates a UI5 panel with a slick image slider for a DataimageGallery widget.
@@ -18,7 +19,10 @@ use exface\UI5Facade\Facades\Interfaces\UI5ControllerInterface;
  *        
  */
 class UI5ImageGallery extends UI5AbstractElement
-{    
+{   
+    use UI5DataElementTrait {
+        buildJsDataLoaderOnLoaded as buildJsDataOnLoadedViaTrait;  
+    }
     use JquerySlickGalleryTrait;
     use JqueryToolbarsTrait;
     
@@ -31,9 +35,10 @@ class UI5ImageGallery extends UI5AbstractElement
 
         return $this;
     }
-        
-    public function buildJsConstructor($oControllerJs = 'oController') : string
+            
+    public function buildJsConstructorForControl($oControllerJs = 'oController') : string
     {
+
         $this->registerExternalModules($this->getController());
         
         $html = <<<HTML
@@ -47,39 +52,39 @@ HTML;
         
         return <<<JS
          new sap.ui.core.HTML("{$this->getId()}", {
+            width: "100%",
+            height: "100%",
             afterRendering: function(oEvent) {
-                {$this->buildJsConstructorForControl()}
+                {$this->buildJsCarouselFunctions()}
+                {$this->buildJsCarouselInit()}
             }
-         }).setContent("$html");
+         }).setContent("$html")
 JS;
-    }
-    
-    public function buildJsConstructorForControl($oControllerJs = 'oController') : string
-    {
-        $widget = $this->getWidget();
-        // Add Scripts for the configurator widget first as they may be needed for the others
-        $configurator_element = $this->getFacade()->getElement($widget->getConfiguratorWidget());
-        $output .= $configurator_element->buildJs();
         
-        // Add scripts for the buttons
-        $output .= $this->buildJsButtons();
+//         $widget = $this->getWidget();
+//         // Add Scripts for the configurator widget first as they may be needed for the others
+//         $configurator_element = $this->getFacade()->getElement($widget->getConfiguratorWidget());
+//         $output .= $configurator_element->buildJs();
         
-        $output .= <<<JS
+//         // Add scripts for the buttons
+//         $output .= $this->buildJsButtons();
         
-                    $('#{$configurator_element->getId()}').find('.grid').on( 'layoutComplete', function( event, items ) {
-                        setTimeout(function(){
-                            var newHeight = $('#{$this->getId()}_wrapper > .panel').height();
-                            $('#{$this->getId()}').height($('#{$this->getId()}').parent().height()-newHeight);
-                        }, 0);
-                    });
+//         $output .= <<<JS
+        
+//                     $('#{$configurator_element->getId()}').find('.grid').on( 'layoutComplete', function( event, items ) {
+//                         setTimeout(function(){
+//                             var newHeight = $('#{$this->getId()}_wrapper > .panel').height();
+//                             $('#{$this->getId()}').height($('#{$this->getId()}').parent().height()-newHeight);
+//                         }, 0);
+//                     });
                     
-JS;
-        return $output . <<<JS
+// JS;
+//         return $output . <<<JS
         
-{$this->buildJsCarouselFunctions()}
-{$this->buildJsCarouselInit()}
+//                 {$this->buildJsCarouselFunctions()}
+//                 {$this->buildJsCarouselInit()}
 
-JS;
+// JS;
     }
     
     public function buildJsDataSource() : string
@@ -184,7 +189,10 @@ JS;
     
     protected function buildJsOnBeforeLoadAddConfiguratorData(string $paramJs = 'param') : string
     {
+        
         $configurator_element = $this->getFacade()->getElement($this->getWidget()->getConfiguratorWidget());
+        
+        $this->setElementType('datagrid');
         
         return <<<JS
         
@@ -197,7 +205,48 @@ JS;
                     console.warn('Could not check filter validity - ', e);
                 }
                 {$paramJs}['data'] = {$configurator_element->buildJsDataGetter(null, true)};
-                
+                    
+                    // Enrich sorting options
+                    if ({$paramJs}.sort !== undefined) {
+                        var sortNames = {$paramJs}.sort.split(',');
+                        var sortAttrs = [];
+                        for (var i=0; i<sortNames.length; i++) {
+                            colOpts = jqself.{$this->getElementType()}('getColumnOption', sortNames[i]);
+                            sortAttrs.push(colOpts !== null ? colOpts['_attributeAlias'] : sortNames[i]);
+                        }
+                        {$paramJs}.sortAttr = sortAttrs.join(',');
+                    }
+                    
+JS;
+
+    }
+    
+    protected function buildJsDataLoaderOnLoaded(string $oModelJs = 'oModel') : string
+    {
+        $widget = $this->getWidget();
+        
+        if (($urlType = $widget->getImageUrlColumn()->getDataType()) && $urlType instanceof UrlDataType) {
+            $base = $urlType->getBaseUrl();
+        }
+        
+        return $this->buildJsDataOnLoadedViaTrait($oModelJs) . <<<JS
+
+            try {
+				var data = {$oModelJs}.getData().rows;
+                var carousel = $('#{$this->getId()}');
+                var src = '';
+                var title = '';
+				for (var i in data) {
+                    src = '{$base}' + data[i]['{$widget->getImageUrlColumn()->getDataColumnName()}'];
+                    title = data[i]['{$widget->getImageTitleColumn()->getDataColumnName()}'];
+                    carousel.slick('slickAdd', '<div class="imagecarousel-item"><img src="' + src + '" title="' + title + '" alt="' + title + '" /></div>');
+                }
+		        {$this->buildJsBusyIconHide()}
+		        $('#{$this->getId()}').data('_loading', 0);
+			} catch (err) {
+                console.error(err);
+				{$this->buildJsBusyIconHide()}
+			}
 JS;
     }
 

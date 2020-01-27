@@ -40,6 +40,7 @@ class UI5ImageGallery extends UI5AbstractElement
     {
 
         $this->registerExternalModules($this->getController());
+        $this->setSlickGalleryId($this->getId() . "_SlickGallery");
         
         $html = <<<HTML
      <div class="exf-grid-item exf-imagecarousel" style="width:{$this->getWidth()};height:{$this->getHeight()};box-sizing:border-box;">
@@ -95,14 +96,16 @@ JS;
             $base = $urlType->getBaseUrl();
         }
         
+       
+        
         return <<<JS
         
     // Don't load if already loading
-    if ($('#{$this->getId()}').data('_loading')) return;
+    if ($('#{$this->getSlickGalleryId()}').data('_loading')) return;
     
 	{$this->buildJsBusyIconShow()}
 	
-    $('#{$this->getId()}').data('_loading', 1);
+    $('#{$this->getSlickGalleryId()}').data('_loading', 1);
     
 	var param = {
        action: '{$widget->getLazyLoadingActionAlias()}',
@@ -120,36 +123,39 @@ JS;
         {$this->buildJsBusyIconHide()}
         return;
     }
-    
-	$.ajax({
-       url: "{$this->getAjaxUrl()}",
-       data: param,
-       method: 'POST',
-       success: function(json){
-			try {
-				var data = json.rows;
-                var carousel = $('#{$this->getId()}');
-                var src = '';
-                var title = '';
-				for (var i in data) {
-                    src = '{$base}' + data[i]['{$widget->getImageUrlColumn()->getDataColumnName()}'];
-                    title = data[i]['{$widget->getImageTitleColumn()->getDataColumnName()}'];
-                    carousel.slick('slickAdd', '<div class="imagecarousel-item"><img src="' + src + '" title="' + title + '" alt="' + title + '" /></div>');
-                }
-		        {$this->buildJsBusyIconHide()}
-		        $('#{$this->getId()}').data('_loading', 0);
-			} catch (err) {
-                console.error(err);
-				{$this->buildJsBusyIconHide()}
-			}
-		},
-		error: function(jqXHR, textStatus,errorThrown){
-		   {$this->buildJsBusyIconHide()}
-		   {$this->buildJsShowError('jqXHR.responseText', 'jqXHR.status + " " + jqXHR.statusText')}
-		}
-	});
-	
+
+    {$this->buildJsBusyIconHide()}
 JS;
+    
+// 	$.ajax({
+//        url: "{$this->getAjaxUrl()}",
+//        data: param,
+//        method: 'POST',
+//        success: function(json){
+// 			try {
+// 				var data = json.rows;
+//                 var carousel = $('#{$this->getSlickGalleryId()}');
+//                 var src = '';
+//                 var title = '';
+// 				for (var i in data) {
+//                     src = '{$base}' + data[i]['{$widget->getImageUrlColumn()->getDataColumnName()}'];
+//                     title = data[i]['{$widget->getImageTitleColumn()->getDataColumnName()}'];
+//                     carousel.slick('slickAdd', '<div class="imagecarousel-item"><img src="' + src + '" title="' + title + '" alt="' + title + '" /></div>');
+//                 }
+// 		        {$this->buildJsBusyIconHide()}
+// 		        $('#{$this->getSlickGalleryId()}').data('_loading', 0);
+// 			} catch (err) {
+//                 console.error(err);
+// 				{$this->buildJsBusyIconHide()}
+// 			}
+// 		},
+// 		error: function(jqXHR, textStatus,errorThrown){
+// 		   {$this->buildJsBusyIconHide()}
+// 		   {$this->buildJsShowError('jqXHR.responseText', 'jqXHR.status + " " + jqXHR.statusText')}
+// 		}
+// 	});
+	
+// JS;
     }
 
     
@@ -162,7 +168,7 @@ JS;
     {
         return <<<JS
         
-           $('#{$this->getId()} .slick-track').empty();
+           $('#{$this->getSlickGalleryId()} .slick-track').empty();
            
 JS;
     }
@@ -233,7 +239,7 @@ JS;
 
             try {
 				var data = {$oModelJs}.getData().rows;
-                var carousel = $('#{$this->getId()}');
+                var carousel = $('#{$this->getSlickGalleryId()}');
                 var src = '';
                 var title = '';
 				for (var i in data) {
@@ -242,7 +248,7 @@ JS;
                     carousel.slick('slickAdd', '<div class="imagecarousel-item"><img src="' + src + '" title="' + title + '" alt="' + title + '" /></div>');
                 }
 		        {$this->buildJsBusyIconHide()}
-		        $('#{$this->getId()}').data('_loading', 0);
+		        $('#{$this->getSlickGalleryId()}').data('_loading', 0);
 			} catch (err) {
                 console.error(err);
 				{$this->buildJsBusyIconHide()}

@@ -89,6 +89,16 @@ trait UI5DataElementTrait {
     }
     
     /**
+     * 
+     * @param UI5ControllerInterface $controller
+     * @return void
+     */
+    protected function buildJsConstructorRegisterControllerMethods(UI5ControllerInterface $controller)
+    {
+        return;
+    }
+    
+    /**
      *
      * {@inheritDoc}
      * @see \exface\UI5Facade\Facades\Elements\UI5AbstractElement::buildJsConstructor()
@@ -100,6 +110,7 @@ trait UI5DataElementTrait {
         
         $controller->addMethod('onUpdateFilterSummary', $this, '', $this->buildJsFilterSummaryUpdater());
         $controller->addMethod('onLoadData', $this, 'oControlEvent, keep_page_pos', $this->buildJsDataLoader());
+        $this->buildJsConstructorRegisterControllerMethods($controller);
         $this->initConfiguratorControl($controller);
         
         // Reload the data every time the view is shown. This is important, because otherwise 

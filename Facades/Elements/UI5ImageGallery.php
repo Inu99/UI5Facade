@@ -97,7 +97,7 @@ JS;
     }
     
     protected function addCarouselFunctions(UI5ControllerInterface $controller) : string
-        
+    {
         // $controller->addProperty($this->buildJsCarouselInitFunctionName(), 'function(){ ' . $this->buildJsCarouselInitFunctionBody() . ' }');
         $controller->addMethod($this->buildJsCarouselInitFunctionName(), $this, '', $this->buildJsCarouselInitFunctionBody());
         // $controller->addProperty($this->buildJsCarouselLoadFunctionName(), 'function(){ ' . $this->buildJsCarouselLoadFunctionBody() . ' }');
@@ -154,6 +154,7 @@ JS;
                 var carousel = $('#{$this->getSlickGalleryId()}');
                 var src = '';
                 var title = '';
+                carousel.slick();
 				for (var i in data) {
                     src = '{$base}' + data[i]['{$widget->getImageUrlColumn()->getDataColumnName()}'];
                     title = data[i]['{$widget->getImageTitleColumn()->getDataColumnName()}'];

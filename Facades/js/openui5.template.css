@@ -93,4 +93,5 @@ table.jexcel {width: 100%}
 .slick-carousel.horizontal .slick-track, 
 .slick-carousel.horizontal .slick-slide, 
 .slick-carousel.horizontal .slick-slide img {height: 100%}
+.slick-carousel.horizontal .slick-slide {width: auto !important}
 .slick-carousel.horizontal .slick-slide {margin-left: 10px}
